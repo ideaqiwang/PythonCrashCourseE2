@@ -1,23 +1,8 @@
 import sys
 import pygame
+from settings import Settings
 from ship import Ship
-
-class Settings:
-    """A class to store all settings for Alien Invasion."""
-
-    def __init__(self):
-        # Screen settings
-        self.screen_width = 1200
-        self.screen_height = 800
-        self.bg_color = (230, 230, 230)
-
-        self.ship_speed = 1.5
-
-# ----------------------------------------------------------------------------- #
-
-
-# ----------------------------------------------------------------------------- #
-
+from bullet import Bullet
 
 
 class AlienInvasion:
@@ -30,13 +15,13 @@ class AlienInvasion:
 
         self.screen = pygame.display.set_mode((self.settings.screen_width,
                                                self.settings.screen_height))
-        # self.settings.screen_width = self.screen.get_rect().width
-        # self.settings.screen_height = self.screen.get_rect().height
+
         pygame.display.set_caption("Alien Invasion")
 
         self.bg_color = (230, 230, 230)
 
         self.ship = Ship(self)
+        self.bullets = pygame.sprite.Group()
 
     def _check_events(self):
         # Respond to the keyborad and mouse events.
@@ -55,6 +40,8 @@ class AlienInvasion:
             self.ship.moving_left = True
         elif event.key == pygame.K_q:
             sys.exit()
+        elif event.key == pygame.K_SPACE:
+            self._fire_bullet()
 
     def _check_keyup_events(self, event):
         if event.key == pygame.K_RIGHT:
@@ -62,20 +49,43 @@ class AlienInvasion:
         elif event.key == pygame.K_LEFT:
             self.ship.moving_left = False
 
+    def _fire_bullet(self):
+        """Create a bullet and add it to the bullets group."""
+        if len(self.bullets) < self.settings.bullet_allowed:
+            new_bullet = Bullet(self)
+            self.bullets.add(new_bullet)
+
     def _update_screen(self):
         """Update images on the screen and flip to the new screen."""
         self.screen.fill(self.settings.bg_color)
         self.ship.blitme()
+        for bullet in self.bullets.sprites():
+            bullet.draw_bullet()
 
         # Make the most recently drwan screen visible.
         pygame.display.flip()
 
+    def _udpate_bullets(self):
+        self.bullets.update()
+
+        for bullet in self.bullets.copy():
+            if bullet.rect.bottom <= 0:
+                self.bullets.remove(bullet)
+        #print('bullets count:', len(self.bullets))
+
     def run_game(self):
         """Start the main loop for the game."""
+        FPS = 60
+        fps_clock = pygame.time.Clock()
         while True:
             self._check_events()
             self.ship.update()
+            self._udpate_bullets()
             self._update_screen()
+
+            fps_clock.tick(FPS)
+            #print('fps:', fps_clock.get_fps())
+
             
 
 
