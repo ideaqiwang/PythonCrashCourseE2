@@ -19,7 +19,7 @@ class Settings:
         self.bullet_allowed = 20
 
         # Alien settings
-        self.alien_speed = 5.0
+        self.alien_speed = 10.0
         self.fleet_drop_speed = 30
 
         # 1 -> right, -1 -> left
